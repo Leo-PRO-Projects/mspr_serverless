@@ -41,7 +41,23 @@
       "Bash(curl -s -X POST http://127.0.0.1:8080/function/generate-password -d '{\"username\":\"michel.ranu\"}' -w \"\\\\nHTTP %{http_code}\\\\n\")",
       "Bash(git init *)",
       "Bash(git config *)",
-      "Bash(git add *)"
+      "Bash(git add *)",
+      "Bash(git commit -q -m ' *)",
+      "Bash([ -f \"$MEM\" ])",
+      "Bash(.venv/Scripts/python.exe -m pip install --quiet streamlit requests)",
+      "Bash(.venv/Scripts/python.exe -m streamlit --version)",
+      "Bash(curl -s -o /dev/null -w \"gateway 8080: HTTP %{http_code}\\\\n\" http://127.0.0.1:8080/healthz)",
+      "Bash(kubectl -n openfaas-fn get pods --no-headers)",
+      "Bash(.venv/Scripts/python.exe -m py_compile frontend/app.py)",
+      "Bash(docker build *)",
+      "Bash(kubectl -n openfaas-fn rollout status deploy/frontend --timeout=150s)",
+      "Bash(curl -s -o /dev/null -w \"HTTP %{http_code}\\\\n\" -H \"Host: cofrap.localhost\" http://localhost:8081/_stcore/health)",
+      "Bash(curl -s -H \"Host: cofrap.localhost\" http://localhost:8081/)",
+      "Bash(curl -s -o /dev/null -w \"via cofrap.localhost:8081 -> HTTP %{http_code}\\\\n\" http://cofrap.localhost:8081/_stcore/health)",
+      "Bash(.venv/Scripts/python.exe -m pytest tests/ -q)"
+    ],
+    "additionalDirectories": [
+      "c:\\Users\\Leo\\.claude\\projects\\c--MSPR-Serverless-DEV\\memory"
     ]
   }
 }

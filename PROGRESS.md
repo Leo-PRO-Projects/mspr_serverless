@@ -14,8 +14,8 @@
 | 2 | Infrastructure Kubernetes + OpenFaaS | `[x]` déployé (k3d) | 100 % |
 | 3 | Base de données | `[x]` déployée | 100 % |
 | 4 | Développement des fonctions OpenFaaS | `[x]` déployées & testées | 95 % |
-| 5 | Frontend de démonstration | `[~]` code écrit | 80 % |
-| 6 | Intégration, tests & déploiement | `[~]` end-to-end OK | 80 % |
+| 5 | Frontend de démonstration | `[x]` déployé en cluster | 95 % |
+| 6 | Intégration, tests & déploiement | `[~]` end-to-end OK | 85 % |
 | 7 | Volet multiculturel / inclusion / prestataires | `[ ]` | 0 % |
 | 8 | Dossier final + support de soutenance | `[ ]` | 0 % |
 
@@ -60,13 +60,16 @@
 - [x] **3 fonctions déployées et Running** (`infra/k8s/functions.yaml`)
 - [x] Tests unitaires (`tests/` — **9/9 passés**, DB simulée)
 - [x] **Tests end-to-end sur cluster** : password, 2FA, auth OK/KO, expiration 6 mois ✅
-- [ ] *(optionnel livraison)* push images sur GHCR public via `faas-cli up`
+- [ ] **Push des images sur GHCR** (Mission 6) — script prêt (`scripts/push-ghcr.sh`), nécessite un token GitHub `write:packages`
 
 ## Phase 5 — Frontend de démonstration
-- [x] Écran création de compte (QR mot de passe + QR 2FA) — `frontend/app.py`
 - [x] Écran authentification (login + mdp + OTP)
-- [x] Gestion du cas « compte expiré » → relance du cycle
-- [ ] Test manuel dans le navigateur (Streamlit branché sur la gateway)
+- [x] **Création du compte si inexistant** (404 → génération automatique) — conforme au sujet
+- [x] **Relance automatique** si compte expiré (status `expired` → régénération) — conforme au sujet
+- [x] Écran création explicite (QR mot de passe + QR 2FA)
+- [x] **Frontend conteneurisé et déployé dans le cluster** (`infra/k8s/frontend.yaml`, Ingress Traefik)
+- [x] Accès validé : `http://cofrap.localhost:8081` (HTTP 200) + appel interne gateway OK
+- [ ] Captures d'écran navigateur (pour le dossier)
 
 ## Phase 6 — Intégration, tests & déploiement
 - [x] Test bout‑en‑bout via gateway : création → 2FA → authentification ✅
@@ -118,4 +121,10 @@
 - Images des 3 fonctions construites (template debian) et importées dans k3d.
 - Contournement du blocage OpenFaaS CE (« images publiques ») via Deployments/Services natifs (`infra/k8s/functions.yaml`).
 - **Validation end-to-end sur le cluster** : generate-password, generate-2fa, authenticate (OK / mauvais OTP / expiré) → tous conformes.
-- **Prochaine étape** : init Git, test visuel du frontend Streamlit, puis Phase 1 (gestion de projet) + Phase 7.
+
+### 2026-06-05 (suite 2) — Mise en conformité frontend + déploiement cluster
+- Frontend réécrit conforme au sujet : **création si inexistant** (404→génération) et **relance auto si expiré**.
+- Frontend **conteneurisé** (`frontend/Dockerfile`) et **déployé dans le cluster** (`infra/k8s/frontend.yaml` : Deployment + Service + Ingress Traefik).
+- Accès navigateur validé : `http://cofrap.localhost:8081` (HTTP 200) ; appel interne `gateway.openfaas:8080` → fonction → DB → QR OK.
+- Scripts mis à jour (build + import + déploiement du frontend) ; `scripts/push-ghcr.sh` prêt pour la livraison GHCR.
+- **Reste côté code** : push GHCR (Mission 6, besoin token). Le reste = livrables gestion de projet (Phases 1 & 7).

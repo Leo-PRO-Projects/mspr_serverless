@@ -69,12 +69,14 @@ ni dans le code, ni dans les images.
 
 ## A.4 Frontend de démonstration
 
-Rôle **strictement limité à la démo** (le sujet insiste sur la simplicité) :
-- formulaire de **création de compte** (appelle `generate-password` puis `generate-2fa`, affiche les 2 QR codes) ;
-- formulaire d'**authentification** (login + mot de passe + code TOTP → `authenticate`) ;
-- gestion du cas **expiré** : message + relance du cycle de génération.
+Rôle **strictement limité à la démo** (le sujet insiste sur la simplicité), avec le flux exact attendu :
+- **authentification** (login + mot de passe + code TOTP → `authenticate`) ;
+- **création du compte s'il n'existe pas** (réponse 404 → `generate-password` puis `generate-2fa`, 2 QR codes) ;
+- **relance automatique** de la génération si le compte est **expiré** (réponse `expired` → régénération).
 
-Techno : **Streamlit** (affichage natif des images QR, zéro build front) — ou Flask + page HTML/JS si l'équipe préfère.
+Techno : **Streamlit** (affichage natif des QR, zéro build front). Le frontend est **conteneurisé
+et déployé dans le cluster** (`infra/k8s/frontend.yaml` : Deployment + Service + Ingress Traefik),
+accessible sur `http://cofrap.localhost:8081` ; il appelle la gateway via `http://gateway.openfaas:8080`.
 
 ## A.5 Infrastructure & déploiement — **100 % local (k3d)**
 

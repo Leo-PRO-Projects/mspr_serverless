@@ -1,0 +1,68 @@
+# Déploiement du frontend de démonstration DANS le cluster (Deployment + Service + Ingress).
+# Accès depuis le PC : http://cofrap.localhost:8081  (le LoadBalancer k3d mappe 8081 -> 80,
+# Traefik route l'hôte cofrap.localhost vers ce service).
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  namespace: openfaas-fn
+  labels:
+    app: cofrap-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cofrap-frontend
+  template:
+    metadata:
+      labels:
+        app: cofrap-frontend
+    spec:
+      containers:
+        - name: frontend
+          image: ghcr.io/leo-pro-projects/cofrap-frontend:0.1.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8501
+          env:
+            # Gateway OpenFaaS par DNS interne (le frontend tourne dans le cluster).
+            - name: OPENFAAS_URL
+              value: http://gateway.openfaas:8080
+          readinessProbe:
+            httpGet: { path: /_stcore/health, port: 8501 }
+            initialDelaySeconds: 5
+            periodSeconds: 5
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+  namespace: openfaas-fn
+  labels:
+    app: cofrap-frontend
+spec:
+  selector:
+    app: cofrap-frontend
+  ports:
+    - { port: 8501, targetPort: 8501 }
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: frontend
+  namespace: openfaas-fn
+  annotations:
+    kubernetes.io/ingress.class: traefik
+spec:
+  rules:
+    - host: cofrap.localhost
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend
+                port:
+                  number: 8501

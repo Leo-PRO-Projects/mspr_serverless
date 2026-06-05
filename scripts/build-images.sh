@@ -24,5 +24,9 @@ for fn in "${FUNCS[@]}"; do
   docker build -t "${REGISTRY}/cofrap-${fn}:${TAG}" "$ctx"
 done
 
+# --- Frontend (image Streamlit, build docker classique) -------------------- #
+echo "=== Build frontend ==="
+docker build -t "${REGISTRY}/cofrap-frontend:${TAG}" frontend
+
 echo "=== Images construites ==="
 docker images | grep cofrap- || true

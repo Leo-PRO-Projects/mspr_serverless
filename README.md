@@ -80,9 +80,11 @@ MSPR_Serverless_DEV/
 Tout le PoC se déploie sur le PC (Docker + k3d), sans VM ni cloud :
 
 ```bash
-bash scripts/setup-local.sh                              # cluster + OpenFaaS + PostgreSQL + fonctions
-kubectl -n openfaas port-forward svc/gateway 8080:8080   # expose la gateway en local
-# Test :
+bash scripts/setup-local.sh                              # cluster + OpenFaaS + PostgreSQL + fonctions + frontend
+# Frontend (déployé dans le cluster, via Traefik) :
+#   → http://cofrap.localhost:8081
+# Tests directs des fonctions (gateway) :
+kubectl -n openfaas port-forward svc/gateway 8080:8080
 curl -s -X POST http://127.0.0.1:8080/function/generate-password -d '{"username":"michel.ranu"}'
 ```
 

@@ -51,28 +51,28 @@ bash scripts/build-images.sh
 k3d image import -c ${CLUSTER} \
   ghcr.io/leo-pro-projects/cofrap-generate-password:0.1.0 \
   ghcr.io/leo-pro-projects/cofrap-generate-2fa:0.1.0 \
-  ghcr.io/leo-pro-projects/cofrap-authenticate:0.1.0
+  ghcr.io/leo-pro-projects/cofrap-authenticate:0.1.0 \
+  ghcr.io/leo-pro-projects/cofrap-frontend:0.1.0
 
 # --- 5. Déploiement des fonctions (manifests natifs) ----------------------- #
 echo "== Déploiement des fonctions =="
 kubectl -n openfaas rollout status deploy/gateway --timeout=180s
 kubectl -n openfaas-fn rollout status statefulset/postgres --timeout=180s
 kubectl apply -f infra/k8s/functions.yaml
+kubectl apply -f infra/k8s/frontend.yaml
 kubectl -n openfaas-fn rollout status deploy/generate-password --timeout=120s
 kubectl -n openfaas-fn rollout status deploy/generate-2fa --timeout=120s
 kubectl -n openfaas-fn rollout status deploy/authenticate --timeout=120s
+kubectl -n openfaas-fn rollout status deploy/frontend --timeout=120s
 
 cat <<EOF
 
-✅ PoC déployé.
+✅ PoC déployé (fonctions + frontend dans le cluster).
 
-Pour exposer la gateway OpenFaaS sur http://127.0.0.1:8080 :
+Frontend (servi par le cluster via Traefik) :
+   http://cofrap.localhost:8081
+
+Gateway OpenFaaS (pour tests directs) :
    kubectl -n openfaas port-forward svc/gateway 8080:8080
-
-Test rapide :
    curl -s -X POST http://127.0.0.1:8080/function/generate-password -d '{"username":"michel.ranu"}'
-
-Frontend de démonstration :
-   cd frontend && pip install -r requirements.txt
-   set OPENFAAS_URL=http://127.0.0.1:8080 && streamlit run app.py
 EOF

@@ -1,19 +1,36 @@
 # Frontend de démonstration
 
-Application **Streamlit** simple pour démontrer le cycle complet : création de compte
-(QR mot de passe + QR 2FA), authentification, et relance si compte expiré.
+Application **Streamlit** simple démontrant le cycle complet conforme au sujet :
+- **authentification** (login + mot de passe + code 2FA) ;
+- **création du compte s'il n'existe pas** (génération mot de passe + 2FA via QR codes) ;
+- **relance automatique** de la génération si le compte est **expiré** (> 6 mois).
 
-## Lancement local
+## Accès — frontend déployé dans le cluster (recommandé)
 
-```bash
-pip install -r requirements.txt
-export OPENFAAS_URL=http://openfaas.local      # URL de la gateway OpenFaaS
-streamlit run app.py
+Déployé par `scripts/setup-local.sh` (Deployment + Service + Ingress Traefik) :
+
+```
+http://cofrap.localhost:8081
 ```
 
-## Écrans
-- **Créer un compte** : appelle `generate-password` puis `generate-2fa`, affiche les 2 QR codes.
-- **Se connecter** : appelle `authenticate` (login + mot de passe + code TOTP) ; gère le cas `expired`.
+Le pod appelle la gateway OpenFaaS par son DNS interne (`http://gateway.openfaas:8080`).
 
-> Pour la soutenance : scanner le QR mot de passe pour le lire, le QR 2FA avec une app
-> d'authentification (Google/Microsoft Authenticator, FreeOTP), puis se connecter.
+> Repli si besoin : `kubectl -n openfaas-fn port-forward svc/frontend 8501:8501` → http://127.0.0.1:8501
+
+## Accès — exécution locale (hors cluster)
+
+```bash
+# Gateway exposée localement dans un autre terminal :
+kubectl -n openfaas port-forward svc/gateway 8080:8080
+
+# Puis (Git Bash) :
+OPENFAAS_URL=http://127.0.0.1:8080 ../.venv/Scripts/python.exe -m streamlit run app.py
+```
+
+## Scénario de démonstration
+1. Onglet **« Se connecter / S'inscrire »** : saisir un nom inexistant → le compte est **créé** (2 QR codes).
+2. Scanner le **QR 2FA** avec une app d'authentification (Google/Microsoft Authenticator, FreeOTP).
+3. Se reconnecter avec login + mot de passe + code 2FA → **✅ Authentification réussie**.
+4. Cas **expiré** : un compte de plus de 6 mois déclenche la **régénération** automatique des identifiants.
+
+> Pensez aux **captures d'écran** de chaque étape (livrable du dossier final).

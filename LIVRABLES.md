@@ -45,15 +45,15 @@ Document unique reprenant l'ensemble du projet (Mission 8 + section V du sujet) 
 
 ## 4. Livrables techniques (artefacts de code & infra)
 
-- [ ] **L4.1** — `infra/database/schema.sql` + manifests StatefulSet PostgreSQL
-- [ ] **L4.2** — `infra/helm/` : values + procédure d'installation OpenFaaS
-- [ ] **L4.3** — `infra/k8s/` : namespace, Ingress, secrets (templates)
-- [ ] **L4.4** — `functions/generate-password/` (code + handler + requirements)
-- [ ] **L4.5** — `functions/generate-2fa/`
-- [ ] **L4.6** — `functions/authenticate/`
-- [ ] **L4.7** — `stack.yml` (définition faas-cli des 3 fonctions + images GHCR)
-- [ ] **L4.8** — Images de conteneurs **publiées sur GHCR**
-- [ ] **L4.9** — `frontend/` : application de démonstration
+- [x] **L4.1** — `infra/database/schema.sql` + manifests StatefulSet PostgreSQL
+- [x] **L4.2** — `infra/helm/` + `infra/k3d/` : values + procédure d'installation OpenFaaS (local k3d)
+- [x] **L4.3** — `infra/k8s/` : Ingress, secrets (templates), manifests fonctions & frontend
+- [x] **L4.4** — `functions/generate-password/` (code + handler + requirements)
+- [x] **L4.5** — `functions/generate-2fa/`
+- [x] **L4.6** — `functions/authenticate/`
+- [x] **L4.7** — `stack.yml` (définition faas-cli des 3 fonctions + images GHCR)
+- [ ] **L4.8** — Images de conteneurs **publiées sur GHCR** *(script prêt, besoin token `write:packages`)*
+- [x] **L4.9** — `frontend/` : application de démonstration **déployée dans le cluster**
 
 ## 5. Livrables de soutenance
 
