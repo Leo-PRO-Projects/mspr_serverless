@@ -1,0 +1,21 @@
+# Ingress Traefik (fourni par K3S) exposant la gateway OpenFaaS hors du cluster.
+# Adapter le host à votre environnement (ou utiliser nip.io : openfaas.<IP-worker>.nip.io).
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: openfaas-gateway
+  namespace: openfaas
+  annotations:
+    kubernetes.io/ingress.class: traefik
+spec:
+  rules:
+    - host: openfaas.local        # ex. openfaas.192-168-1-50.nip.io
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: gateway
+                port:
+                  number: 8080

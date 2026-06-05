@@ -1,0 +1,53 @@
+# Définition de la stack OpenFaaS — PoC COFRAP (registre GHCR : leo-pro-projects).
+#   faas-cli template store pull python3-http
+#   faas-cli up -f stack.yml        # build + push (GHCR) + deploy
+# Alternative 100% locale (sans push) : faas-cli build -f stack.yml puis
+#   k3d image import ... (cf. infra/k3d/README.md)
+version: 1.0
+provider:
+  name: openfaas
+  gateway: http://127.0.0.1:8080     # surchargé par $OPENFAAS_URL
+
+configuration:
+  templates:
+    - name: python3-http-debian
+
+functions:
+  generate-password:
+    lang: python3-http-debian
+    handler: ./functions/generate-password
+    image: ghcr.io/leo-pro-projects/cofrap-generate-password:0.1.0
+    environment:
+      DB_HOST: postgres.openfaas-fn.svc.cluster.local
+      DB_PORT: "5432"
+      DB_NAME: cofrap
+      DB_USER: cofrap
+    secrets:
+      - fernet-key
+      - db-password
+
+  generate-2fa:
+    lang: python3-http-debian
+    handler: ./functions/generate-2fa
+    image: ghcr.io/leo-pro-projects/cofrap-generate-2fa:0.1.0
+    environment:
+      DB_HOST: postgres.openfaas-fn.svc.cluster.local
+      DB_PORT: "5432"
+      DB_NAME: cofrap
+      DB_USER: cofrap
+    secrets:
+      - fernet-key
+      - db-password
+
+  authenticate:
+    lang: python3-http-debian
+    handler: ./functions/authenticate
+    image: ghcr.io/leo-pro-projects/cofrap-authenticate:0.1.0
+    environment:
+      DB_HOST: postgres.openfaas-fn.svc.cluster.local
+      DB_PORT: "5432"
+      DB_NAME: cofrap
+      DB_USER: cofrap
+    secrets:
+      - fernet-key
+      - db-password

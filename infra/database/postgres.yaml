@@ -1,0 +1,94 @@
+# PostgreSQL pour le PoC COFRAP — StatefulSet + Service + initialisation du schéma.
+# Namespace : openfaas-fn (même namespace que les fonctions pour un accès réseau simple).
+#
+# Le mot de passe est lu depuis un Secret Kubernetes `cofrap-db` (voir infra/k8s/secrets.example.yaml).
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-init
+  namespace: openfaas-fn
+data:
+  schema.sql: |
+    CREATE TABLE IF NOT EXISTS users (
+        id        SERIAL PRIMARY KEY,
+        username  VARCHAR(128) NOT NULL UNIQUE,
+        password  TEXT,
+        mfa       TEXT,
+        gendate   BIGINT,
+        expired   SMALLINT NOT NULL DEFAULT 0
+    );
+    CREATE INDEX IF NOT EXISTS idx_users_username ON users (username);
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+  namespace: openfaas-fn
+  labels:
+    app: postgres
+spec:
+  clusterIP: None          # Headless service pour le StatefulSet
+  selector:
+    app: postgres
+  ports:
+    - port: 5432
+      targetPort: 5432
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres
+  namespace: openfaas-fn
+spec:
+  serviceName: postgres
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:16-alpine
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_DB
+              value: cofrap
+            - name: POSTGRES_USER
+              value: cofrap
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: cofrap-db
+                  key: db-password
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+            - name: init
+              mountPath: /docker-entrypoint-initdb.d
+      volumes:
+        - name: init
+          configMap:
+            name: postgres-init
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 1Gi

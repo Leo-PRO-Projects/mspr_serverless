@@ -1,0 +1,190 @@
+# Déploiement des 3 fonctions OpenFaaS en manifests Kubernetes natifs.
+#
+# Pourquoi ce fichier ? OpenFaaS Community Edition refuse, via son API de déploiement
+# (`faas-cli deploy`), les images non publiques ("CE only allows public images").
+# Pour rester 100 % local (images importées dans k3d, aucun registre externe requis),
+# on crée directement les Deployments + Services attendus par la gateway :
+#   - label `faas_function: <nom>` → la gateway/faas-netes reconnaît la fonction,
+#   - Service nommé comme la fonction → routage de /function/<nom>,
+#   - secrets montés dans /var/openfaas/secrets/ (comme le ferait faas-cli),
+#   - container = image de la fonction (of-watchdog écoute sur 8080).
+#
+# Pour la livraison "officielle", la voie standard reste `faas-cli up -f stack.yml`
+# avec un push vers GHCR en image publique (cf. infra/k3d/README.md).
+---
+# ---------- generate-password ----------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: generate-password
+  namespace: openfaas-fn
+  labels:
+    faas_function: generate-password
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      faas_function: generate-password
+  template:
+    metadata:
+      labels:
+        faas_function: generate-password
+      annotations:
+        prometheus.io.scrape: "false"
+    spec:
+      containers:
+        - name: generate-password
+          image: ghcr.io/leo-pro-projects/cofrap-generate-password:0.1.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+          env:
+            - { name: DB_HOST, value: postgres.openfaas-fn.svc.cluster.local }
+            - { name: DB_PORT, value: "5432" }
+            - { name: DB_NAME, value: cofrap }
+            - { name: DB_USER, value: cofrap }
+            - { name: fprocess, value: "python index.py" }
+          readinessProbe:
+            httpGet: { path: /_/health, port: 8080 }
+            initialDelaySeconds: 2
+            periodSeconds: 5
+          volumeMounts:
+            - { name: openfaas-secrets, mountPath: /var/openfaas/secrets, readOnly: true }
+      volumes:
+        - name: openfaas-secrets
+          projected:
+            sources:
+              - secret: { name: fernet-key,  items: [{ key: fernet-key,  path: fernet-key }] }
+              - secret: { name: db-password, items: [{ key: db-password, path: db-password }] }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: generate-password
+  namespace: openfaas-fn
+  labels:
+    faas_function: generate-password
+spec:
+  selector:
+    faas_function: generate-password
+  ports:
+    - { port: 8080, targetPort: 8080, protocol: TCP }
+---
+# ---------- generate-2fa ----------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: generate-2fa
+  namespace: openfaas-fn
+  labels:
+    faas_function: generate-2fa
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      faas_function: generate-2fa
+  template:
+    metadata:
+      labels:
+        faas_function: generate-2fa
+      annotations:
+        prometheus.io.scrape: "false"
+    spec:
+      containers:
+        - name: generate-2fa
+          image: ghcr.io/leo-pro-projects/cofrap-generate-2fa:0.1.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+          env:
+            - { name: DB_HOST, value: postgres.openfaas-fn.svc.cluster.local }
+            - { name: DB_PORT, value: "5432" }
+            - { name: DB_NAME, value: cofrap }
+            - { name: DB_USER, value: cofrap }
+            - { name: fprocess, value: "python index.py" }
+          readinessProbe:
+            httpGet: { path: /_/health, port: 8080 }
+            initialDelaySeconds: 2
+            periodSeconds: 5
+          volumeMounts:
+            - { name: openfaas-secrets, mountPath: /var/openfaas/secrets, readOnly: true }
+      volumes:
+        - name: openfaas-secrets
+          projected:
+            sources:
+              - secret: { name: fernet-key,  items: [{ key: fernet-key,  path: fernet-key }] }
+              - secret: { name: db-password, items: [{ key: db-password, path: db-password }] }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: generate-2fa
+  namespace: openfaas-fn
+  labels:
+    faas_function: generate-2fa
+spec:
+  selector:
+    faas_function: generate-2fa
+  ports:
+    - { port: 8080, targetPort: 8080, protocol: TCP }
+---
+# ---------- authenticate ----------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: authenticate
+  namespace: openfaas-fn
+  labels:
+    faas_function: authenticate
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      faas_function: authenticate
+  template:
+    metadata:
+      labels:
+        faas_function: authenticate
+      annotations:
+        prometheus.io.scrape: "false"
+    spec:
+      containers:
+        - name: authenticate
+          image: ghcr.io/leo-pro-projects/cofrap-authenticate:0.1.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+          env:
+            - { name: DB_HOST, value: postgres.openfaas-fn.svc.cluster.local }
+            - { name: DB_PORT, value: "5432" }
+            - { name: DB_NAME, value: cofrap }
+            - { name: DB_USER, value: cofrap }
+            - { name: fprocess, value: "python index.py" }
+          readinessProbe:
+            httpGet: { path: /_/health, port: 8080 }
+            initialDelaySeconds: 2
+            periodSeconds: 5
+          volumeMounts:
+            - { name: openfaas-secrets, mountPath: /var/openfaas/secrets, readOnly: true }
+      volumes:
+        - name: openfaas-secrets
+          projected:
+            sources:
+              - secret: { name: fernet-key,  items: [{ key: fernet-key,  path: fernet-key }] }
+              - secret: { name: db-password, items: [{ key: db-password, path: db-password }] }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: authenticate
+  namespace: openfaas-fn
+  labels:
+    faas_function: authenticate
+spec:
+  selector:
+    faas_function: authenticate
+  ports:
+    - { port: 8080, targetPort: 8080, protocol: TCP }

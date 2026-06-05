@@ -1,0 +1,37 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+
+# Secrets — NE JAMAIS committer
+*.secret
+secrets/
+*.key
+.env
+*-secret.yaml
+.fernet-key
+.db-password
+.openfaas-admin-password
+.pf-gateway.log
+infra/k8s/secrets.yaml
+
+# Kubernetes / Helm
+kubeconfig
+*.kubeconfig
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Build / tests
+*.log
+dist/
+build/
+.pytest_cache/
+
+# Template OpenFaaS (tiers, récupéré via `faas-cli template store pull`)
+template/

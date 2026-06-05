@@ -1,0 +1,27 @@
+# Values Helm pour OpenFaaS Community (chart openfaas/openfaas).
+# PoC COFRAP — cluster K3S (control-plane + worker).
+
+# Authentification de la gateway (basic auth générée à l'install, cf. README).
+basic_auth: true
+
+# Community Edition (pas de scale-to-zero auto ; faisable manuellement).
+openfaasPro: false
+
+# Exposition : on s'appuie sur l'Ingress Traefik fourni par K3S (cf. infra/k8s/ingress.yaml).
+exposeServices: false
+serviceType: ClusterIP
+
+# Dimensionnement léger adapté au PoC.
+gateway:
+  replicas: 1
+
+faasnetes:
+  # Namespace where functions are deployed.
+  functionNamespace: openfaas-fn
+  # IfNotPresent : permet d'utiliser les images importées localement (k3d image import)
+  # sans devoir les pousser/puller depuis un registre distant (flux 100 % local).
+  imagePullPolicy: "IfNotPresent"
+
+# Mise à l'échelle / file d'attente par défaut conservée.
+queueWorker:
+  replicas: 1

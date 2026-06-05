@@ -1,0 +1,25 @@
+# Configuration du cluster k3d (K3S dans Docker) — PoC COFRAP, 100 % local.
+#   k3d cluster create --config infra/k3d/cluster.yaml
+#
+# 1 server (control-plane) + 1 agent (worker) → reproduit l'architecture du sujet
+# sans VM. Traefik (Ingress) et svclb (LoadBalancer) sont fournis par K3S.
+apiVersion: k3d.io/v1alpha5
+kind: Simple
+metadata:
+  name: cofrap
+servers: 1          # control-plane
+agents: 1           # worker
+image: rancher/k3s:v1.31.5-k3s1
+ports:
+  # Expose le LoadBalancer Traefik du cluster sur localhost:8081 (HTTP via Ingress)
+  - port: 8081:80
+    nodeFilters:
+      - loadbalancer
+options:
+  k3d:
+    wait: true
+  k3s:
+    nodeLabels:
+      - label: role=worker
+        nodeFilters:
+          - agent:0
