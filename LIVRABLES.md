@@ -52,7 +52,7 @@ Document unique reprenant l'ensemble du projet (Mission 8 + section V du sujet) 
 - [x] **L4.5** — `functions/generate-2fa/`
 - [x] **L4.6** — `functions/authenticate/`
 - [x] **L4.7** — `stack.yml` (définition faas-cli des 3 fonctions + images GHCR)
-- [ ] **L4.8** — Images de conteneurs **publiées sur GHCR** *(script prêt, besoin token `write:packages`)*
+- [x] **L4.8** — Images de conteneurs **publiées sur GHCR** (4 images : 3 fonctions + frontend) *(penser à les passer en visibilité publique)*
 - [x] **L4.9** — `frontend/` : application de démonstration **déployée dans le cluster**
 
 ## 5. Livrables de soutenance

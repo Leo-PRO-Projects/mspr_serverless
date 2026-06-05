@@ -13,7 +13,7 @@
 | 1 | Gestion de projet (WBS, Gantt, Kanban, CDC) | `[ ]` | 0 % |
 | 2 | Infrastructure Kubernetes + OpenFaaS | `[x]` déployé (k3d) | 100 % |
 | 3 | Base de données | `[x]` déployée | 100 % |
-| 4 | Développement des fonctions OpenFaaS | `[x]` déployées & testées | 95 % |
+| 4 | Développement des fonctions OpenFaaS | `[x]` déployées, testées, images sur GHCR | 100 % |
 | 5 | Frontend de démonstration | `[x]` déployé en cluster | 95 % |
 | 6 | Intégration, tests & déploiement | `[~]` end-to-end OK | 85 % |
 | 7 | Volet multiculturel / inclusion / prestataires | `[ ]` | 0 % |
@@ -60,7 +60,8 @@
 - [x] **3 fonctions déployées et Running** (`infra/k8s/functions.yaml`)
 - [x] Tests unitaires (`tests/` — **9/9 passés**, DB simulée)
 - [x] **Tests end-to-end sur cluster** : password, 2FA, auth OK/KO, expiration 6 mois ✅
-- [ ] **Push des images sur GHCR** (Mission 6) — script prêt (`scripts/push-ghcr.sh`), nécessite un token GitHub `write:packages`
+- [x] **Push des 4 images sur GHCR** (Mission 6) ✅ — `ghcr.io/leo-pro-projects/cofrap-*:0.1.0`
+- [ ] Passer les paquets GHCR en **visibilité publique** (étape UI GitHub)
 
 ## Phase 5 — Frontend de démonstration
 - [x] Écran authentification (login + mdp + OTP)
@@ -133,3 +134,9 @@
 - Ajout de [`docs/GUIDE-UTILISATION.md`](GUIDE-UTILISATION.md) : déploiement, lancement de l'interface,
   parcours utilisateur complet, push GHCR, dépannage et **déroulé de démonstration pour la soutenance**.
 - Lié depuis le README ; commande SQL de démo (affichage des données chiffrées) vérifiée.
+
+### 2026-06-05 (suite 4) — Push GHCR réussi (Mission 6)
+- Les **4 images** (generate-password, generate-2fa, authenticate, frontend) **poussées sur GHCR**
+  (`ghcr.io/leo-pro-projects/cofrap-*:0.1.0`). Login réussi, digests confirmés.
+- **Volet technique du sujet désormais 100 % couvert.** Reste : passer les paquets en public (UI GitHub),
+  puis les livrables de gestion de projet (Phases 1 & 7).
