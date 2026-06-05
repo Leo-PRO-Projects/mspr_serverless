@@ -128,3 +128,8 @@
 - Accès navigateur validé : `http://cofrap.localhost:8081` (HTTP 200) ; appel interne `gateway.openfaas:8080` → fonction → DB → QR OK.
 - Scripts mis à jour (build + import + déploiement du frontend) ; `scripts/push-ghcr.sh` prêt pour la livraison GHCR.
 - **Reste côté code** : push GHCR (Mission 6, besoin token). Le reste = livrables gestion de projet (Phases 1 & 7).
+
+### 2026-06-05 (suite 3) — Guide d'utilisation
+- Ajout de [`docs/GUIDE-UTILISATION.md`](GUIDE-UTILISATION.md) : déploiement, lancement de l'interface,
+  parcours utilisateur complet, push GHCR, dépannage et **déroulé de démonstration pour la soutenance**.
+- Lié depuis le README ; commande SQL de démo (affichage des données chiffrées) vérifiée.

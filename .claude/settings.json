@@ -54,7 +54,8 @@
       "Bash(curl -s -o /dev/null -w \"HTTP %{http_code}\\\\n\" -H \"Host: cofrap.localhost\" http://localhost:8081/_stcore/health)",
       "Bash(curl -s -H \"Host: cofrap.localhost\" http://localhost:8081/)",
       "Bash(curl -s -o /dev/null -w \"via cofrap.localhost:8081 -> HTTP %{http_code}\\\\n\" http://cofrap.localhost:8081/_stcore/health)",
-      "Bash(.venv/Scripts/python.exe -m pytest tests/ -q)"
+      "Bash(.venv/Scripts/python.exe -m pytest tests/ -q)",
+      "Bash(kubectl -n openfaas-fn exec postgres-0 -- psql -U cofrap -d cofrap -c \"SELECT id, username, left\\(password,15\\)||'...' AS password_chiffre, expired FROM users;\")"
     ],
     "additionalDirectories": [
       "c:\\Users\\Leo\\.claude\\projects\\c--MSPR-Serverless-DEV\\memory"

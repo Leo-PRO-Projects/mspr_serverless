@@ -90,6 +90,9 @@ curl -s -X POST http://127.0.0.1:8080/function/generate-password -d '{"username"
 
 Détail pas-à-pas et explications : [infra/k3d/README.md](infra/k3d/README.md). Suppression : `bash scripts/teardown-local.sh`.
 
+> 📖 **Guide complet (déploiement, interface web, parcours utilisateur, push GHCR, démo soutenance)** :
+> [docs/GUIDE-UTILISATION.md](docs/GUIDE-UTILISATION.md)
+
 > Les commandes exactes sont documentées au fur et à mesure dans [PROGRESS.md](PROGRESS.md) et le dossier final.
 
 ### Tests des fonctions (sans cluster)
@@ -110,6 +113,7 @@ python -m venv .venv
 
 ## 7. Suivi
 
+- 📖 Guide d'utilisation & de démonstration → [docs/GUIDE-UTILISATION.md](docs/GUIDE-UTILISATION.md)
 - 📌 État d'avancement détaillé → [PROGRESS.md](PROGRESS.md)
 - 📦 Livrables et conformité barème → [LIVRABLES.md](LIVRABLES.md)
 - 🏗️ Décisions d'architecture → [ARCHITECTURE.md](ARCHITECTURE.md)
