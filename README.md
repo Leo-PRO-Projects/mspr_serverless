@@ -31,6 +31,31 @@ interagissant avec une base de données. L'implémentation finale sera réalisé
 
 Un **frontend de démonstration** orchestre : création de compte → mot de passe (QR) → 2FA (QR) → authentification → renouvellement si expiré.
 
+### 2.1 Détail des fonctions — entrées / sorties
+
+| Fonction | Rôle | Entrée (JSON) | Sortie succès (HTTP 200) | Effet base de données |
+|----------|------|---------------|--------------------------|------------------------|
+| **generate-password** | Génère un mot de passe 24 car. (maj/min/chiffres/spéciaux), le chiffre, le stocke, renvoie un QR code du mot de passe | `{"username": "michel.ranu"}` | `{"username", "qrcode_png_base64", "gendate"}` | **Upsert** : `password` (chiffré Fernet), `gendate`, `expired=0` |
+| **generate-2fa** | Génère un secret TOTP (2FA), le chiffre, le stocke, renvoie un QR code `otpauth://` scannable | `{"username": "michel.ranu"}` | `{"username", "qrcode_png_base64", "otpauth_uri"}` | **Upsert** : `mfa` (secret chiffré Fernet), `gendate`, `expired=0` |
+| **authenticate** | Vérifie login + mot de passe + code 2FA et l'ancienneté (< 6 mois) | `{"username", "password", "otp"}` | `{"status": "ok", "message"}` | Si périmé : `UPDATE expired=1` |
+
+**Réponses détaillées de `authenticate` :**
+
+| Cas | HTTP | Sortie JSON |
+|-----|------|-------------|
+| Identifiants valides | `200` | `{"status": "ok", "message": "Authentification réussie"}` |
+| Compte expiré (> 6 mois ou `expired=1`) | `200` | `{"status": "expired", "message": "Identifiants expirés… Relancez la génération…"}` |
+| Mot de passe incorrect | `401` | `{"status": "invalid", "message": "mot de passe incorrect"}` |
+| Code 2FA incorrect | `401` | `{"status": "invalid", "message": "code 2FA incorrect"}` |
+| Compte inconnu | `404` | `{"status": "invalid", "message": "compte inconnu"}` |
+
+**Codes d'erreur communs aux 3 fonctions :** `400` (paramètre obligatoire manquant) · `500` (erreur interne : base de données, chiffrement…).
+
+> Notes : `qrcode_png_base64` = image PNG encodée base64 (affichée telle quelle par le frontend) ;
+> `password` et `mfa` ne sont **jamais** stockés en clair (chiffrement **Fernet**) ;
+> les secrets (`fernet-key`, `db-password`) sont lus dans `/var/openfaas/secrets/` ;
+> `gendate` (timestamp Unix) sert au calcul d'expiration (rotation 6 mois).
+
 ## 3. Stack technique retenue
 
 | Domaine | Choix | Justification courte |
